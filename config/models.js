@@ -17,7 +17,7 @@ module.exports.models = {
   * connections (see `config/connections.js`)                                *
   *                                                                          *
   ***************************************************************************/
-  // connection: 'localDiskDb',
+  connection: 'backendMysql',
 
   /***************************************************************************
   *                                                                          *
@@ -27,6 +27,9 @@ module.exports.models = {
   * See http://sailsjs.org/#!/documentation/concepts/ORM/model-settings.html  *
   *                                                                          *
   ***************************************************************************/
-  // migrate: 'alter'
-
+  migrate: 'alter',
+  autoPk: true, // Skip ID on schema
+  schema: true, // Only schema attribute model accept not other
+  autoUpdatedAt: true,
+  autoCreatedAt: true
 };
