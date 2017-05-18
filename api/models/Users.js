@@ -70,14 +70,36 @@ module.exports = {
   },
   
   comparePassword : function (password, user, cb) {
+
     bcrypt.compare(password, user.encryptedPassword, function (err, match) {
 
       if(err) cb(err);
       if(match) {
-        cb(null, true);
+        cb(null, true);  
       } else {
         cb(err);
       }
     })
+  },
+
+  checkStrength : function (password, cb) {
+
+    if (password.length > 10) {
+      if(/(\d)/.test(password)) {
+        if(/[A-Z]/.test(password)) {
+          if(/\W/.test(password)) {
+            cb(null, true);
+          } else {
+            cb("Caractère spéciaux manquant.");
+          }
+        } else {
+          cb("Lettre majuscule manquante.");
+        }
+      } else {
+        cb("Chiffre manquant.");
+      }
+    } else {
+      cb("Plus de 10 caractère requis.");
+    }
   }
 };
