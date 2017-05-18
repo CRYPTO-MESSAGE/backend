@@ -57,7 +57,7 @@ module.exports = {
   // Here we encrypt password before creating a User
   beforeCreate : function (values, next) {
 
-  	values.username = "user" + randomize.uniqueTime()
+  	values.username = "user" + randomize.nombreAleatoire(5000, 10000, true)
   	
     bcrypt.genSalt(10, function (err, salt) {
       if(err) return next(err);
