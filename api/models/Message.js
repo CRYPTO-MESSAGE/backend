@@ -7,6 +7,7 @@
 
 module.exports = {
 
+  schema: true,
   attributes: {
   	contenu : {
   		type: 'text',
@@ -16,7 +17,7 @@ module.exports = {
       model: 'discussion'
     },
     // Add a reference to User
-    owner: {
+    author: {
       model: 'users'
     },
 

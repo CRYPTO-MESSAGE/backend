@@ -5,85 +5,95 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
-module.exports = {
-	
-	create: function (req, res) {
-		if (!req.body.usernameDest) {
-      		return res.json(401, {err: 'Destinataire required'});
-		}  
+ module.exports = {
 
-		var usernameDest = req.body.usernameDest;
+ 	create: function (req, res) {
+ 		if (!req.body.usernameDest) {
+ 			return res.json(401, {err: 'Destinataire required'});
+ 		}  
 
-		if (!req.body.message) {
-      		return res.json(401, {err: 'Message required'});
-		}  
+ 		var usernameDest = req.body.usernameDest;
 
-	    Users.findOne({username: usernameDest}).exec( function (err, userDest) {
-		      if (!userDest) {
-		        return res.json(401, {err: 'invalid usernameDest'});
-		      }
+ 		if (!req.body.contenu) {
+ 			return res.json(401, {err: 'Message required'});
+ 		}  
 
-		      var token = jwToken.getToken(req)
+ 		Users.findOne({username: usernameDest}).exec( function (err, userDest) {
+ 			if (!userDest) {
+ 				return res.json(401, {err: 'invalid usernameDest'});
+ 			}
 
-		      Users.findOne({id : req.token.id}).exec( function (err, user) {
 
-				if (!user) {
-					return res.json(401, {err: 'invalid user emitter'});
-				}
+ 			Users.findOne({id : req.token.id}).exec( function (err, user) {
+
+ 				if (!user) {
+ 					return res.json(401, {err: 'invalid user emitter'});
+ 				}
 
 				// Check discussion if existe and get it or null
-				var discussion = self.checkDiscussion(user, userDest);
+				var discussion = null;
+				sails.log("User and user dest")
+				sails.log(userDest)
+				sails.log(user)
+				req.body.author = user
 
-				if (discussion === null) {
-					Discussion.create({owner: user, target: userDest}).exec( function (err, disc) {
-
-						if (err) { return res.serverError(err); }
-
-  						sails.log('disc\'s id is:', disc.id);
-
-  						discussion = disc;
-					});
-				}	
-
-				// Messsage creation
-				Message.create(req.body).exec(function (err, message) {
+				Discussion.findOne({
+					or : [
+					{owner: user.id, target: userDest.id },
+					{owner: userDest.id, target: user.id}
+					]
+				}).exec(function (err, disc) {
 					if (err) {
-						return res.json(err.status, {err: err});
+						sails.log('Erreur discussion', err)
 					}
 
-					if (message) {
-						sails.log('Message created (no discussion yet) !');
+					sails.log("find")
+					if(disc) {
+						req.body.discussion = disc;
+
+						sails.log('discussion final: ', req.body.discussion)
+						// Messsage creation
+						Message.create(req.body).exec(function (err, message) {
+							if (err) {
+								return res.json(err.status, {err: err});
+							}
+
+							if (message) {
+								sails.log('Message created (no discussion yet) !');
+								res.json(200, {messages: req.body.discussion.messages, message: message, token: jwToken.issue({id: user.id})});
+							}
+
+						}); // Message
+					} else {
+						Discussion.create({owner: user, target: userDest}).exec( function (err, disc) {
+
+							if (err) { return res.serverError(err); }
+
+							sails.log('disc\'s id is:', disc.id);
+
+							req.body.discussion = disc;
+
+							sails.log('discussion final: ', req.body.discussion)
+							// Messsage creation
+							Message.create(req.body).exec(function (err, message) {
+								if (err) {
+									return res.json(err.status, {err: err});
+								}
+
+								if (message) {
+									sails.log('Message created (no discussion yet) !');
+									res.json(200, {messages: req.body.discussion.messages, message: message, token: jwToken.issue({id: user.id})});
+								}
+
+							}); // Message
+						});
 					}
+				});
 
-					message.populate({discussion: discussion, owner: user}).exec( function (err, messageEdited) { 
-						if (err) {
-							seils.log('Edit with discussion not work')
-							return res.json(err.status, {err: err});
-						}
+				
 
-						return res.json(200, 'Message created full success!');
-					});
-
-				}); // Message
 		    }); //Users
 		}); //Users dest
-	},
-	checkDiscussion: function (src, dest) {
-
-		var discussion = null;
-
-		Discussion.findOne({
-	        or : [
-	            {owner: src, target: dest},
-	            {owner: dest, target: src}
-	        ]
-	    }).exec(function (err, disc) {
-				if (disc.length) {
-					discussion = disc;
-				}
-			});
-
-	    return discussion;
-	}
-};
+ 	}
+ };
 

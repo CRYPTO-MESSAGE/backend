@@ -30,7 +30,7 @@ module.exports = {
     // Add a reference to Discussion
     messages: {
       collection: 'message',
-      via: 'owner'
+      via: 'author'
     },
 
     // Add a reference to Discussion
