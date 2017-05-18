@@ -21,8 +21,9 @@ The backend is made by love with sails.
 
 | Version   | Cool    |
 |:---------:| -------:|
-| v1.0.0    | Message |
+| v1.2.0    | Contact |
 | v1.0.1    | Contact |
+| v1.0.0    | Message |
 
 #### Installation
 
