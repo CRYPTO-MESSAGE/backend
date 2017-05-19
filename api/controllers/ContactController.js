@@ -23,6 +23,8 @@ module.exports = {
 	 			}
 				Users
 					.findOne({id : req.token.id})
+					.populate('contacts')
+					.populate('contactsOf')
 					.exec( function (err, user) {
 						if (err) {
 								sails.log('Error ', err)
@@ -33,11 +35,12 @@ module.exports = {
 			 			}
 
 			 			// var user = user.pop()
-						contact.contactsOf.add(user.id)
-					    contact.save(
-					      function(err){
-					      	if (err) sails.log(err)
-					     });
+						user.contacts.add(contact.id);
+					    user.save(
+					      	function(err){
+					        	if (err) sails.log(err);
+					     	}
+					    );
 
 	 					return res.json(200, {contacts: user.contacts});
 				});
@@ -45,13 +48,16 @@ module.exports = {
 	},
 	index: function (req, res) {
 		sails.log("Index")
-		Users.find({id : req.token.id}).exec( function (err, user) {
+		Users
+		.findOne({id : req.token.id})
+		.populate('contacts') // Add info for entry
+		.exec( function (err, user) {
 
  				if (!user) {
  					return res.json(401, {err: 'invalid user emitter'});
  				}
 
- 				return res.json(200, {user: user.contactsOf})
+ 				return res.json(200, {contacts: user.contacts})
  		});
 	},
 };

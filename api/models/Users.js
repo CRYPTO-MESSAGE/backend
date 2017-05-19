@@ -36,7 +36,8 @@ module.exports = {
     // Add a reference to Discussion
     contacts: {
       collection: 'users',
-      via: 'contactsOf'
+      via: 'contactsOf',
+      dominant: true
     },
 
     contactsOf: {
